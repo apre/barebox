@@ -136,35 +136,6 @@ void print_IPaddr (IPaddr_t x)
 	puts(ip_to_string(x));
 }
 
-int string_to_ethaddr(const char *str, u8 enetaddr[6])
-{
-	int reg;
-	char *e;
-
-        if (!str || strlen(str) != 17) {
-		memset(enetaddr, 0, 6);
-		return -EINVAL;
-	}
-
-        if (str[2] != ':' || str[5] != ':' || str[8] != ':' ||
-                        str[11] != ':' || str[14] != ':')
-                return -EINVAL;
-
-	for (reg = 0; reg < 6; ++reg) {
-		enetaddr[reg] = simple_strtoul (str, &e, 16);
-			str = e + 1;
-	}
-
-	return 0;
-}
-
-void ethaddr_to_string(const u8 enetaddr[6], char *str)
-{
-	sprintf(str, "%02x:%02x:%02x:%02x:%02x:%02x",
-		 enetaddr[0], enetaddr[1], enetaddr[2], enetaddr[3],
-		 enetaddr[4], enetaddr[5]);
-}
-
 static unsigned char *arp_ether;
 static IPaddr_t arp_wait_ip;
 
@@ -348,7 +319,7 @@ static struct net_connection *net_new(IPaddr_t dest, rx_handler_f *handler,
 		random_ether_addr(edev->ethaddr);
 		ethaddr_to_string(edev->ethaddr, str);
 		printf("warning: No MAC address set. Using random address %s\n", str);
-		dev_set_param(&edev->dev, "ethaddr", str);
+		eth_set_ethaddr(edev, edev->ethaddr);
 	}
 
 	/* If we don't have an ip only broadcast is allowed */
